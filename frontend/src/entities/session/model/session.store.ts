@@ -31,19 +31,28 @@ function saveUser(user: SessionUser | null) {
 interface SessionState {
   token: string | null
   user: SessionUser | null
+  /** Кратковременный флаг: выход уже начался, но навигация на главную ещё не зафиксирована. */
+  loggingOut: boolean
 }
 
 /** Состояние сессии. Токен хранится в tokenStorage (его читает Apollo), здесь — реактивная копия для React. */
 export const useSessionStore = create<SessionState>(() => ({
   token: tokenStorage.get(),
   user: loadUser(),
+  loggingOut: false,
 }))
 
 export const sessionActions = {
+  beginLogout() {
+    useSessionStore.setState({ loggingOut: true })
+  },
+  endLogout() {
+    useSessionStore.setState({ loggingOut: false })
+  },
   setSession(token: string, user: SessionUser) {
     tokenStorage.set(token)
     saveUser(user)
-    useSessionStore.setState({ token, user })
+    useSessionStore.setState({ token, user, loggingOut: false })
   },
   updateUser(user: SessionUser) {
     saveUser(user)

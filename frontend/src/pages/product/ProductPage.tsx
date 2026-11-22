@@ -2,7 +2,7 @@ import { useParams } from 'react-router'
 import { AddToCartButton } from '@/features/add-to-cart'
 import { FavoriteButton } from '@/features/toggle-favorite'
 import { useProduct, useProducts, Price } from '@/entities/product'
-import { usePageTitle } from '@/shared/lib'
+import { pluralize, usePageTitle } from '@/shared/lib'
 import { ErrorState, PageLoader, RatingStars, SafeImage } from '@/shared/ui'
 import { ProductGrid } from '@/widgets/product-grid'
 import { ProductReviews } from '@/widgets/product-reviews'
@@ -48,7 +48,9 @@ export function ProductPage() {
           <div className="flex items-center gap-3 text-sm text-slate-600">
             <RatingStars rating={product.rating} />
             <span>{product.rating.toFixed(1)}</span>
-            <span>{product.reviewsCount} отзывов</span>
+            <span>
+              {product.reviewsCount} {pluralize(product.reviewsCount, ['отзыв', 'отзыва', 'отзывов'])}
+            </span>
           </div>
           <Price price={product.price} oldPrice={product.oldPrice} className="text-2xl" />
           <p className="text-sm text-slate-500">
