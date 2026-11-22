@@ -1,4 +1,4 @@
-import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Paper, Typography } from '@mui/material'
 import { CategoryTile, useCategories } from '@/entities/category'
 import { useProducts } from '@/entities/product'
 import { usePageTitle } from '@/shared/lib'
@@ -12,14 +12,14 @@ export function HomePage() {
 
   return (
     <Box sx={{ display: 'grid', gap: 4 }}>
-      <Box sx={{ borderRadius: 4, background: 'linear-gradient(90deg, #005bff, #0047cc)', color: 'white', px: { xs: 3, sm: 5 }, py: 5 }}>
-        <Typography component="h1" variant="h4">
+      <Paper sx={{ p: { xs: 3, sm: 4 } }}>
+        <Typography component="h1" variant="h4" gutterBottom>
           Всё, что нужно, — в одном магазине
         </Typography>
-        <Typography sx={{ mt: 1.5, maxWidth: 560, color: 'rgba(255,255,255,0.8)' }}>
+        <Typography color="text.secondary" sx={{ maxWidth: 560 }}>
           Электроника, одежда, товары для дома и многое другое с быстрой доставкой.
         </Typography>
-      </Box>
+      </Paper>
 
       <Box component="section">
         <Typography component="h2" variant="h5" sx={{ mb: 2 }}>
