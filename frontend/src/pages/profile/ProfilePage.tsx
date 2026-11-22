@@ -1,8 +1,8 @@
+import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material'
 import { useMe } from '@/entities/user'
 import { ProfileForm } from '@/features/edit-profile'
 import { LogoutButton } from '@/features/logout'
 import { usePageTitle } from '@/shared/lib'
-import { ErrorState, PageLoader } from '@/shared/ui'
 
 export function ProfilePage() {
   usePageTitle('Профиль')
@@ -11,19 +11,23 @@ export function ProfilePage() {
 
   if (!user) {
     return loading ? (
-      <PageLoader />
+      <CircularProgress sx={{ display: 'block', mx: 'auto', my: 6 }} />
     ) : (
-      <ErrorState message={error ? 'Не удалось загрузить профиль' : 'Профиль недоступен'} onRetry={() => void refetch()} />
+      <Alert severity="error" action={<Button onClick={() => void refetch()}>Повторить</Button>}>
+        {error ? 'Не удалось загрузить профиль' : 'Профиль недоступен'}
+      </Alert>
     )
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5">
-      <h1 className="text-2xl font-bold">Профиль</h1>
+    <Box sx={{ maxWidth: 672, mx: 'auto', display: 'grid', gap: 2.5 }}>
+      <Typography component="h1" variant="h4">
+        Профиль
+      </Typography>
       <ProfileForm me={user} />
-      <div className="flex justify-end">
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
         <LogoutButton />
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }

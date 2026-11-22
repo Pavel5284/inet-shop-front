@@ -1,15 +1,19 @@
+import { Box, Container, Typography } from '@mui/material'
 import { APP_NAME } from '@/shared/config'
-import { Container } from '@/shared/ui'
 
 const YEAR = new Date().getFullYear()
 
 export function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-white py-6 text-sm text-slate-500">
-      <Container className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <span>© {YEAR} {APP_NAME}. Все права защищены.</span>
-        <span>Интернет-магазин для всей семьи</span>
+    <Box component="footer" sx={{ borderTop: 1, borderColor: 'divider', bgcolor: 'background.paper', py: 3 }}>
+      <Container maxWidth="lg" sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', gap: 1 }}>
+        <Typography variant="body2" color="text.secondary">
+          © {YEAR} {APP_NAME}. Все права защищены.
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Интернет-магазин для всей семьи
+        </Typography>
       </Container>
-    </footer>
+    </Box>
   )
 }

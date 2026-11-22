@@ -1,4 +1,5 @@
-import { Search } from 'lucide-react'
+import { Search } from '@mui/icons-material'
+import { Box, IconButton, InputAdornment, TextField } from '@mui/material'
 import { useState } from 'react'
 import type { SubmitEvent } from 'react'
 import { useNavigate } from 'react-router'
@@ -16,18 +17,26 @@ export function SearchBar() {
   }
 
   return (
-    <form role="search" onSubmit={onSubmit} className="flex h-10 w-full items-center rounded-xl bg-slate-100 px-3 focus-within:ring-2 focus-within:ring-brand-light">
-      <input
-        type="search"
-        aria-label="Поиск товаров"
-        placeholder="Поиск товаров"
+    <Box component="form" role="search" onSubmit={onSubmit} sx={{ width: 1 }}>
+      <TextField
+        size="small"
+        fullWidth
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
+        placeholder="Поиск товаров"
+        slotProps={{
+          htmlInput: { 'aria-label': 'Поиск товаров' },
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton type="submit" aria-label="Найти" size="small">
+                  <Search />
+                </IconButton>
+              </InputAdornment>
+            ),
+          },
+        }}
       />
-      <button type="submit" aria-label="Найти" className="ml-2 text-slate-500 hover:text-brand">
-        <Search className="size-5" />
-      </button>
-    </form>
+    </Box>
   )
 }

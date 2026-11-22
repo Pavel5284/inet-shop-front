@@ -1,7 +1,6 @@
-import { Heart } from 'lucide-react'
+import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material'
 import { useFavoriteProducts } from '@/entities/product'
 import { usePageTitle } from '@/shared/lib'
-import { EmptyState, ErrorState, PageLoader } from '@/shared/ui'
 import { ProductGrid } from '@/widgets/product-grid'
 
 export function FavoritesPage() {
@@ -9,19 +8,23 @@ export function FavoritesPage() {
   const { data, loading, error, refetch } = useFavoriteProducts()
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-bold">Избранное</h1>
+    <Box sx={{ display: 'grid', gap: 2 }}>
+      <Typography component="h1" variant="h4">
+        Избранное
+      </Typography>
       {!data ? (
         loading ? (
-          <PageLoader />
+          <CircularProgress sx={{ justifySelf: 'center' }} />
         ) : (
-          <ErrorState message={error ? 'Не удалось загрузить избранное' : 'Избранное недоступно'} onRetry={() => void refetch()} />
+          <Alert severity="error" action={<Button onClick={() => void refetch()}>Повторить</Button>}>
+            {error ? 'Не удалось загрузить избранное' : 'Избранное недоступно'}
+          </Alert>
         )
       ) : data.favorites.length === 0 ? (
-        <EmptyState icon={<Heart className="size-8" />} title="В избранном пока пусто" description="Нажимайте на сердечко у понравившихся товаров." />
+        <Typography color="text.secondary">В избранном пока пусто</Typography>
       ) : (
         <ProductGrid products={data.favorites} />
       )}
-    </div>
+    </Box>
   )
 }

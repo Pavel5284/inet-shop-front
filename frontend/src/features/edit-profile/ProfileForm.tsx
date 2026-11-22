@@ -1,9 +1,9 @@
+import { Alert, Box, Button, Paper, TextField } from '@mui/material'
 import { useState } from 'react'
 import type { SubmitEvent } from 'react'
 import { sessionActions } from '@/entities/session'
 import { useUpdateProfile, type Me } from '@/entities/user'
 import { getErrorMessage } from '@/shared/lib'
-import { Alert, Button, Input } from '@/shared/ui'
 
 /** Редактирование профиля: сервер — источник истины, локальная копия сессии обновляется после успеха. */
 export function ProfileForm({ me }: { me: Me }) {
@@ -38,16 +38,18 @@ export function ProfileForm({ me }: { me: Me }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 rounded-2xl bg-white p-5 shadow-sm sm:p-6">
-      <Input label="Имя" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
-      <Input label="Фамилия" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
-      <Input label="Телефон" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+7 900 000-00-00" />
-      <Input label="Адрес доставки" value={address} onChange={(e) => setAddress(e.target.value)} />
-      {error && <Alert>{error}</Alert>}
-      {saved && <Alert tone="success">Профиль сохранён</Alert>}
-      <Button type="submit" loading={loading}>
-        Сохранить
-      </Button>
-    </form>
+    <Paper component="form" onSubmit={onSubmit} sx={{ p: 3 }}>
+      <Box sx={{ display: 'grid', gap: 2 }}>
+        <TextField label="Имя" id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} fullWidth slotProps={{ htmlInput: { required: true } }} />
+        <TextField label="Фамилия" id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} fullWidth slotProps={{ htmlInput: { required: true } }} />
+        <TextField label="Телефон" id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+7 900 000-00-00" fullWidth />
+        <TextField label="Адрес доставки" id="address" value={address} onChange={(e) => setAddress(e.target.value)} fullWidth />
+        {error && <Alert severity="error">{error}</Alert>}
+        {saved && <Alert severity="success">Профиль сохранён</Alert>}
+        <Button type="submit" variant="contained" loading={loading} sx={{ justifySelf: 'start' }}>
+          Сохранить
+        </Button>
+      </Box>
+    </Paper>
   )
 }

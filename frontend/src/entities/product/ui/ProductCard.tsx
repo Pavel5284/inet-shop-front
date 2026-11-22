@@ -1,9 +1,8 @@
-import { Star } from 'lucide-react'
+import { Box, Card, CardContent, Chip, Link, Typography } from '@mui/material'
 import type { ReactNode } from 'react'
-import { Link } from 'react-router'
+import { Link as RouterLink } from 'react-router'
 import { paths } from '@/shared/config'
-import { pluralize } from '@/shared/lib'
-import { SafeImage } from '@/shared/ui'
+import { IMAGE_FALLBACK, pluralize } from '@/shared/lib'
 import type { Product } from '../model/types'
 import { Price } from './Price'
 
@@ -18,51 +17,57 @@ interface Props {
 export function ProductCard({ product, favoriteSlot, actionSlot }: Props) {
   const inStock = product.stock > 0
   return (
-    <article className="relative flex flex-col rounded-2xl bg-white p-3 shadow-sm transition-shadow hover:shadow-md">
-      <div className="relative">
-        <Link to={paths.product(product.slug)} tabIndex={-1} aria-hidden>
-          <SafeImage src={product.images[0]} alt="" className="aspect-square w-full rounded-xl" />
+    <Card component="article" sx={{ position: 'relative', display: 'flex', flexDirection: 'column', p: 1.5, height: '100%' }}>
+      <Box sx={{ position: 'relative' }}>
+        <Link component={RouterLink} to={paths.product(product.slug)} aria-hidden tabIndex={-1} sx={{ display: 'block' }}>
+          <Box
+            component="img"
+            src={product.images[0] ?? IMAGE_FALLBACK}
+            alt=""
+            loading="lazy"
+            onError={(event) => {
+              event.currentTarget.src = IMAGE_FALLBACK
+            }}
+            sx={{ width: 1, aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 2, display: 'block' }}
+          />
         </Link>
         {product.discountPercent ? (
-          <span className="absolute left-2 top-2 rounded-md bg-accent px-1.5 py-0.5 text-xs font-bold text-white">−{product.discountPercent}%</span>
+          <Chip label={`−${product.discountPercent}%`} size="small" color="secondary" sx={{ position: 'absolute', top: 8, left: 8, fontWeight: 700 }} />
         ) : null}
-        {favoriteSlot && <div className="absolute right-2 top-2">{favoriteSlot}</div>}
-      </div>
+        {favoriteSlot && <Box sx={{ position: 'absolute', top: 8, right: 8 }}>{favoriteSlot}</Box>}
+      </Box>
 
-      <div className="mt-3">
+      <CardContent sx={{ px: 0.5, pb: 0, '&:last-child': { pb: 0 }, flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Price price={product.price} oldPrice={product.oldPrice} />
-      </div>
-      <Link to={paths.product(product.slug)} className="mt-1 line-clamp-2 min-h-10 text-sm leading-5 hover:text-brand">
-        {product.title}
-      </Link>
-      <div className="mt-1 flex items-center gap-1 text-xs text-slate-500">
-        {product.reviewsCount > 0 ? (
-          <>
-            <Star className="size-3.5 fill-amber-400 text-amber-400" />
-            <span className="font-semibold text-slate-700">{product.rating.toFixed(1)}</span>
-            <span>
-              · {product.reviewsCount} {pluralize(product.reviewsCount, ['отзыв', 'отзыва', 'отзывов'])}
-            </span>
-          </>
-        ) : (
-          <span>Пока без отзывов</span>
-        )}
-      </div>
-
-      <div className="mt-auto pt-3">
-        {inStock ? actionSlot : <p className="flex h-10 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500">Нет в наличии</p>}
-      </div>
-    </article>
+        <Link component={RouterLink} to={paths.product(product.slug)} underline="hover" sx={{ mt: 0.5, fontSize: 14, lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {product.title}
+        </Link>
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+          {product.reviewsCount > 0
+            ? `★ ${product.rating.toFixed(1)} · ${product.reviewsCount} ${pluralize(product.reviewsCount, ['отзыв', 'отзыва', 'отзывов'])}`
+            : 'Пока без отзывов'}
+        </Typography>
+        <Box sx={{ mt: 'auto', pt: 1.5 }}>
+          {inStock ? (
+            actionSlot
+          ) : (
+            <Typography variant="body2" color="text.secondary" sx={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'action.hover', borderRadius: 2 }}>
+              Нет в наличии
+            </Typography>
+          )}
+        </Box>
+      </CardContent>
+    </Card>
   )
 }
 
 export function ProductCardSkeleton() {
   return (
-    <div className="animate-pulse rounded-2xl bg-white p-3">
-      <div className="aspect-square rounded-xl bg-slate-100" />
-      <div className="mt-3 h-6 w-1/2 rounded bg-slate-100" />
-      <div className="mt-2 h-10 rounded bg-slate-100" />
-      <div className="mt-3 h-10 rounded-xl bg-slate-100" />
-    </div>
+    <Card sx={{ p: 1.5 }}>
+      <Box sx={{ aspectRatio: '1 / 1', borderRadius: 2, bgcolor: 'action.hover' }} />
+      <Box sx={{ mt: 1.5, height: 24, width: '50%', borderRadius: 1, bgcolor: 'action.hover' }} />
+      <Box sx={{ mt: 1, height: 40, borderRadius: 1, bgcolor: 'action.hover' }} />
+      <Box sx={{ mt: 1.5, height: 40, borderRadius: 2, bgcolor: 'action.hover' }} />
+    </Card>
   )
 }

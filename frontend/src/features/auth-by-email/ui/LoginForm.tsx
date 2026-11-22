@@ -1,9 +1,9 @@
+import { Alert, Box, Button, Paper, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 import type { SubmitEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { DEMO_CREDENTIALS, SHOW_DEMO_LOGIN, paths } from '@/shared/config'
 import { getErrorMessage, getRedirectTarget, usePageTitle, type AuthRedirectState } from '@/shared/lib'
-import { Alert, Button, Input } from '@/shared/ui'
 import { useLogin } from '../api/auth.api'
 
 /** Форма входа: обычный вход по email и кнопка демо-входа. После входа возвращает на исходную страницу. */
@@ -39,29 +39,32 @@ export function LoginForm() {
   }
 
   return (
-    <div className="mx-auto max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-sm sm:p-8">
-      <h1 className="text-2xl font-bold">Вход</h1>
-      {state?.reason && <Alert tone="info">{state.reason}</Alert>}
-      {error && <Alert>{error}</Alert>}
-      <form onSubmit={onSubmit} className="space-y-4">
-        <Input label="Email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <Input
-          label="Пароль"
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <Button type="submit" fullWidth loading={loading}>
+    <Paper sx={{ maxWidth: 460, mx: 'auto', p: 3 }}>
+      <Typography component="h1" variant="h4" gutterBottom>
+        Вход
+      </Typography>
+      {state?.reason && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          {state.reason}
+        </Alert>
+      )}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      <Box component="form" onSubmit={onSubmit} sx={{ display: 'grid', gap: 2 }}>
+        <TextField label="Email" id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth slotProps={{ htmlInput: { required: true } }} />
+        <TextField label="Пароль" id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth slotProps={{ htmlInput: { required: true } }} />
+        <Button type="submit" variant="contained" size="large" fullWidth loading={loading}>
           Войти
         </Button>
-      </form>
+      </Box>
       {SHOW_DEMO_LOGIN && (
-        <Button variant="outline" fullWidth loading={loading} onClick={() => void submit(DEMO_CREDENTIALS.email, DEMO_CREDENTIALS.password)}>
+        <Button variant="outlined" fullWidth loading={loading} sx={{ mt: 2 }} onClick={() => void submit(DEMO_CREDENTIALS.email, DEMO_CREDENTIALS.password)}>
           Войти как демо-пользователь
         </Button>
       )}
-    </div>
+    </Paper>
   )
 }

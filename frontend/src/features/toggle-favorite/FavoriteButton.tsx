@@ -1,5 +1,5 @@
-import clsx from 'clsx'
-import { Heart } from 'lucide-react'
+import { Favorite, FavoriteBorder } from '@mui/icons-material'
+import { IconButton, Tooltip } from '@mui/material'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { useFavoriteIds, useToggleFavorite } from '@/entities/favorite'
@@ -34,26 +34,16 @@ export function FavoriteButton({ productId, className }: Props) {
   }
 
   return (
-    <>
-      <button
-        type="button"
+    <Tooltip title={error ?? ''}>
+      <IconButton
         aria-label={active ? 'Убрать из избранного' : 'В избранное'}
         aria-pressed={active}
         onClick={onClick}
-        title={error}
-        className={clsx(
-          'flex size-9 items-center justify-center rounded-full bg-white/90 shadow-sm transition-colors hover:bg-white',
-          active ? 'text-accent' : 'text-slate-400 hover:text-accent',
-          className,
-        )}
+        className={className}
+        sx={{ bgcolor: 'background.paper', color: active ? 'secondary.main' : 'text.secondary' }}
       >
-        <Heart className={clsx('size-5', active && 'fill-current')} />
-      </button>
-      {error && (
-        <span role="alert" className="sr-only">
-          {error}
-        </span>
-      )}
-    </>
+        {active ? <Favorite /> : <FavoriteBorder />}
+      </IconButton>
+    </Tooltip>
   )
 }

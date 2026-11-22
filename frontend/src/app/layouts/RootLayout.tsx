@@ -1,22 +1,22 @@
+import { Box, Button, Container, Typography } from '@mui/material'
 import { Outlet, ScrollRestoration, useRouteError } from 'react-router'
 import { LogoutGuard } from '@/features/logout'
-import { Container, ErrorState } from '@/shared/ui'
 import { Footer } from '@/widgets/footer'
 import { Header } from '@/widgets/header'
 
 export function RootLayout() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <LogoutGuard />
       <Header />
-      <main className="flex-1 py-6">
-        <Container>
+      <Box component="main" sx={{ flex: 1, py: 3 }}>
+        <Container maxWidth="lg">
           <Outlet />
         </Container>
-      </main>
+      </Box>
       <Footer />
       <ScrollRestoration />
-    </div>
+    </Box>
   )
 }
 
@@ -25,8 +25,13 @@ export function RouteError() {
   const error = useRouteError()
   console.error(error)
   return (
-    <Container className="py-20">
-      <ErrorState message="Произошла непредвиденная ошибка. Попробуйте обновить страницу." onRetry={() => window.location.reload()} />
+    <Container maxWidth="lg" sx={{ py: 10 }}>
+      <Typography role="alert" variant="h6" gutterBottom>
+        Произошла непредвиденная ошибка. Попробуйте обновить страницу.
+      </Typography>
+      <Button variant="outlined" onClick={() => window.location.reload()}>
+        Повторить
+      </Button>
     </Container>
   )
 }

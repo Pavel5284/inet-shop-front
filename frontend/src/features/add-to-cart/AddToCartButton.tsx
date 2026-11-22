@@ -1,15 +1,13 @@
+import { Add, Remove } from '@mui/icons-material'
+import { Box, Button, IconButton, Link, Typography } from '@mui/material'
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router'
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router'
 import { useCart, useCartActions } from '@/entities/cart'
 import { useIsAuthenticated } from '@/entities/session'
 import { paths } from '@/shared/config'
 import { getErrorMessage, type AuthRedirectState } from '@/shared/lib'
-import { Button, QuantityStepper } from '@/shared/ui'
 
-/**
- * Кнопка «В корзину». Если товар уже в корзине — превращается в счётчик (как на Ozon).
- * Гостя отправляет на страницу входа и после входа возвращает обратно.
- */
+/** Кнопка «В корзину». Если товар уже в корзине — превращается в счётчик (как на Ozon). */
 export function AddToCartButton({ product, size = 'md' }: { product: { id: string; stock: number }; size?: 'md' | 'lg' }) {
   const isAuth = useIsAuthenticated()
   const navigate = useNavigate()
@@ -30,29 +28,44 @@ export function AddToCartButton({ product, size = 'md' }: { product: { id: strin
   if (!isAuth) {
     const state: AuthRedirectState = { from: location, reason: 'Войдите, чтобы добавить товар в корзину' }
     return (
-      <Button fullWidth size={size} onClick={() => navigate(paths.login, { state })}>
+      <Button fullWidth size={size === 'lg' ? 'large' : 'medium'} variant="contained" onClick={() => navigate(paths.login, { state })}>
         В корзину
       </Button>
     )
   }
 
   const item = data?.cart.items.find((i) => i.product.id === product.id)
+  const max = Math.min(product.stock, 20)
 
   return (
-    <div className="space-y-1">
+    <Box>
       {item ? (
-        <div className="flex items-center justify-between gap-2">
-          <QuantityStepper value={item.quantity} max={Math.min(product.stock, 20)} disabled={pending} onChange={(q) => void run(() => setQuantity(product.id, q))} />
-          <Link to={paths.cart} className="text-sm font-semibold text-brand hover:underline">
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+          <Box sx={{ display: 'inline-flex', alignItems: 'center', border: 1, borderColor: 'divider', borderRadius: 2 }}>
+            <IconButton aria-label="Уменьшить" size="small" disabled={pending || item.quantity <= 1} onClick={() => void run(() => setQuantity(product.id, item.quantity - 1))}>
+              <Remove fontSize="small" />
+            </IconButton>
+            <Typography component="span" sx={{ minWidth: 28, textAlign: 'center' }}>
+              {item.quantity}
+            </Typography>
+            <IconButton aria-label="Увеличить" size="small" disabled={pending || item.quantity >= max} onClick={() => void run(() => setQuantity(product.id, item.quantity + 1))}>
+              <Add fontSize="small" />
+            </IconButton>
+          </Box>
+          <Link component={RouterLink} to={paths.cart} underline="hover" variant="body2">
             В корзине
           </Link>
-        </div>
+        </Box>
       ) : (
-        <Button fullWidth size={size} loading={pending} onClick={() => void run(() => addToCart(product.id))}>
+        <Button fullWidth size={size === 'lg' ? 'large' : 'medium'} variant="contained" loading={pending} onClick={() => void run(() => addToCart(product.id))}>
           В корзину
         </Button>
       )}
-      {error && <p className="text-xs text-red-600">{error}</p>}
-    </div>
+      {error && (
+        <Typography role="alert" variant="caption" color="error" sx={{ display: 'block' }}>
+          {error}
+        </Typography>
+      )}
+    </Box>
   )
 }

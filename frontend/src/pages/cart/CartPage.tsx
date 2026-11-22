@@ -1,11 +1,10 @@
-import { ShoppingCart } from 'lucide-react'
-import { Link } from 'react-router'
+import { Alert, Box, Button, CircularProgress, Link, List, ListItem, Paper, Typography } from '@mui/material'
+import { Link as RouterLink } from 'react-router'
 import { useCart, useCartActions } from '@/entities/cart'
 import { Price } from '@/entities/product'
 import { CartItemControls } from '@/features/cart-item-controls'
 import { paths } from '@/shared/config'
-import { getErrorMessage, usePageTitle } from '@/shared/lib'
-import { Button, buttonClasses, EmptyState, ErrorState, PageLoader, SafeImage } from '@/shared/ui'
+import { getErrorMessage, IMAGE_FALLBACK, usePageTitle } from '@/shared/lib'
 import { CartSummary } from '@/widgets/cart-summary'
 
 export function CartPage() {
@@ -15,60 +14,84 @@ export function CartPage() {
   const cart = data?.cart
 
   if (!cart) {
-    if (loading) return <PageLoader />
-    return <ErrorState message={error ? getErrorMessage(error) : 'Не удалось загрузить корзину'} onRetry={() => void refetch()} />
+    return loading ? (
+      <CircularProgress sx={{ display: 'block', mx: 'auto', my: 6 }} />
+    ) : (
+      <Alert severity="error" action={<Button onClick={() => void refetch()}>Повторить</Button>}>
+        {error ? getErrorMessage(error) : 'Не удалось загрузить корзину'}
+      </Alert>
+    )
   }
 
   if (cart.items.length === 0) {
     return (
-      <EmptyState
-        icon={<ShoppingCart className="size-8" />}
-        title="В корзине пока пусто"
-        description="Загляните в каталог — там много интересного."
-        action={<Link to={paths.catalog} className={buttonClasses()}>Перейти в каталог</Link>}
-      />
+      <Paper sx={{ p: 6, textAlign: 'center' }}>
+        <Typography component="h1" variant="h5">
+          В корзине пока пусто
+        </Typography>
+        <Typography color="text.secondary" sx={{ mt: 1 }}>
+          Загляните в каталог — там много интересного.
+        </Typography>
+        <Button component={RouterLink} to={paths.catalog} variant="contained" sx={{ mt: 2 }}>
+          Перейти в каталог
+        </Button>
+      </Paper>
     )
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Корзина</h1>
-        <Button variant="ghost" size="sm" disabled={pending} onClick={() => void clearCart().catch(() => undefined)}>
+    <Box sx={{ display: 'grid', gap: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Typography component="h1" variant="h4">
+          Корзина
+        </Typography>
+        <Button size="small" disabled={pending} onClick={() => void clearCart().catch(() => undefined)}>
           Очистить корзину
         </Button>
-      </div>
+      </Box>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        <ul className="space-y-3">
+      <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { xs: '1fr', lg: '1fr 340px' } }}>
+        <List sx={{ display: 'grid', gap: 1.5, p: 0 }}>
           {cart.items.map((item) => (
-            <li key={item.id} className="flex gap-4 rounded-2xl bg-white p-4">
-              <Link to={paths.product(item.product.slug)} className="shrink-0">
-                <SafeImage src={item.product.images[0]} alt="" className="size-24 rounded-xl" />
+            <ListItem key={item.id} sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, bgcolor: 'background.paper', borderRadius: 2, p: 2 }}>
+              <Link component={RouterLink} to={paths.product(item.product.slug)} sx={{ flexShrink: 0 }}>
+                <Box
+                  component="img"
+                  src={item.product.images[0] ?? IMAGE_FALLBACK}
+                  alt=""
+                  onError={(event) => {
+                    event.currentTarget.src = IMAGE_FALLBACK
+                  }}
+                  sx={{ width: 96, height: 96, borderRadius: 2, objectFit: 'cover' }}
+                />
               </Link>
-              <div className="flex min-w-0 flex-1 flex-col gap-2">
-                <Link to={paths.product(item.product.slug)} className="line-clamp-2 font-medium hover:text-brand">
+              <Box sx={{ flex: 1, minWidth: 0, display: 'grid', gap: 1 }}>
+                <Link component={RouterLink} to={paths.product(item.product.slug)} underline="hover" variant="body1">
                   {item.product.title}
                 </Link>
                 <CartItemControls item={item} />
-              </div>
-              <div className="text-right">
+              </Box>
+              <Box sx={{ textAlign: 'right' }}>
                 <Price price={item.lineTotal} />
-                {item.quantity > 1 && <p className="text-xs text-slate-400">{item.quantity} × {item.product.price} ₽</p>}
-              </div>
-            </li>
+                {item.quantity > 1 && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                    {`${item.quantity} × ${item.product.price} ₽`}
+                  </Typography>
+                )}
+              </Box>
+            </ListItem>
           ))}
-        </ul>
+        </List>
 
         <CartSummary
           cart={cart}
           action={
-            <Link to={paths.checkout} className={buttonClasses({ size: 'lg', fullWidth: true })}>
+            <Button component={RouterLink} to={paths.checkout} variant="contained" size="large" fullWidth>
               Перейти к оформлению
-            </Link>
+            </Button>
           }
         />
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }

@@ -1,3 +1,4 @@
+import { Box, Divider, Paper, Typography } from '@mui/material'
 import type { ReactNode } from 'react'
 import type { Cart } from '@/entities/cart'
 import { formatPrice, pluralize } from '@/shared/lib'
@@ -12,23 +13,30 @@ export function CartSummary({ cart, action }: Props) {
   const count = `${cart.totalCount} ${pluralize(cart.totalCount, ['товар', 'товара', 'товаров'])}`
 
   return (
-    <aside className="h-fit rounded-2xl bg-white p-5 shadow-sm">
-      <h2 className="text-lg font-bold">Ваш заказ</h2>
-      <p className="mt-1 text-sm text-slate-500">{count}</p>
+    <Paper sx={{ p: 2.5, alignSelf: 'flex-start' }}>
+      <Typography variant="h6">
+        Ваш заказ
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+        {count}
+      </Typography>
 
       {cart.totalDiscount > 0 && (
-        <div className="mt-4 flex justify-between text-sm text-emerald-700">
-          <span>Скидка</span>
-          <span>−{formatPrice(cart.totalDiscount)}</span>
-        </div>
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', color: 'success.dark' }}>
+          <Typography variant="body2">Скидка</Typography>
+          <Typography variant="body2">−{formatPrice(cart.totalDiscount)}</Typography>
+        </Box>
       )}
 
-      <div className="mt-4 flex items-baseline justify-between border-t border-slate-100 pt-4">
-        <span className="font-semibold">Итого</span>
-        <strong className="text-xl font-extrabold">{formatPrice(cart.totalPrice)}</strong>
-      </div>
+      <Divider sx={{ my: 2 }} />
+      <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+        <Typography>Итого</Typography>
+        <Typography variant="h5">
+          {formatPrice(cart.totalPrice)}
+        </Typography>
+      </Box>
 
-      {action && <div className="mt-5">{action}</div>}
-    </aside>
+      {action && <Box sx={{ mt: 2.5 }}>{action}</Box>}
+    </Paper>
   )
 }

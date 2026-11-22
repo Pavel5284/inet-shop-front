@@ -1,10 +1,8 @@
+import { Alert, Box, Button, MenuItem, Paper, TextField } from '@mui/material'
 import { useState } from 'react'
 import type { SubmitEvent } from 'react'
 import { useCreateReview } from '@/entities/review'
 import { getErrorMessage } from '@/shared/lib'
-import { Alert, Button, Select, Textarea } from '@/shared/ui'
-
-const RATING_OPTIONS = [1, 2, 3, 4, 5].map((value) => ({ value: String(value), label: `${value} из 5` }))
 
 /** Форма публикации отзыва (только для вошедших пользователей). */
 export function ReviewForm({ productId }: { productId: string }) {
@@ -29,20 +27,29 @@ export function ReviewForm({ productId }: { productId: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3 rounded-2xl bg-white p-5 shadow-sm">
-      <Textarea
-        label="Ваш отзыв"
-        placeholder="Расскажите, что вам понравилось…"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        required
-      />
-      <Select label="Оценка" options={RATING_OPTIONS} value={String(rating)} onChange={(e) => setRating(Number(e.target.value))} />
-      {error && <Alert>{error}</Alert>}
-      {sent && <Alert tone="success">Спасибо! Ваш отзыв опубликован.</Alert>}
-      <Button type="submit" loading={loading}>
-        Отправить отзыв
-      </Button>
-    </form>
+    <Paper component="form" onSubmit={onSubmit} sx={{ p: 2.5 }}>
+      <Box sx={{ display: 'grid', gap: 2 }}>
+        <TextField
+          label="Ваш отзыв" id="review"
+          placeholder="Расскажите, что вам понравилось…"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          multiline
+          minRows={3}
+          fullWidth slotProps={{ htmlInput: { required: true } }} />
+        <TextField select label="Оценка" id="rating" value={String(rating)} onChange={(e) => setRating(Number(e.target.value))} fullWidth>
+          {[1, 2, 3, 4, 5].map((value) => (
+            <MenuItem key={value} value={String(value)}>
+              {value} из 5
+            </MenuItem>
+          ))}
+        </TextField>
+        {error && <Alert severity="error">{error}</Alert>}
+        {sent && <Alert severity="success">Спасибо! Ваш отзыв опубликован.</Alert>}
+        <Button type="submit" variant="contained" loading={loading} sx={{ justifySelf: 'start' }}>
+          Отправить отзыв
+        </Button>
+      </Box>
+    </Paper>
   )
 }

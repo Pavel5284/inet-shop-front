@@ -1,29 +1,33 @@
-import clsx from 'clsx'
-import { Heart, LogIn, Package, ShoppingCart, Store, User } from 'lucide-react'
-import { Link, NavLink } from 'react-router'
+import { Favorite, Inventory2, Login, ShoppingCart, Storefront, Person } from '@mui/icons-material'
+import { AppBar, Badge, Box, Button, Container, Toolbar, Typography } from '@mui/material'
+import type { ReactNode } from 'react'
+import { Link as RouterLink, NavLink } from 'react-router'
 import { useCart } from '@/entities/cart'
 import { useCategories } from '@/entities/category'
 import { useIsAuthenticated, useSessionUser } from '@/entities/session'
 import { SearchBar } from '@/features/search-products'
 import { APP_NAME, paths } from '@/shared/config'
-import { Container } from '@/shared/ui'
 
-function NavItem({ to, icon: Icon, label, badge }: { to: string; icon: typeof User; label: string; badge?: number }) {
+interface NavItemProps {
+  to: string
+  icon: ReactNode
+  label: string
+  badge?: number
+}
+
+function NavItem({ to, icon, label, badge }: NavItemProps) {
   return (
-    <NavLink
+    <Button
+      component={NavLink}
       to={to}
-      // Подпись скрыта на узких экранах, поэтому задаём доступное имя явно (для скринридеров и тестов)
       aria-label={badge ? `${label}, товаров: ${badge}` : label}
-      className={({ isActive }) =>
-        clsx('relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-xs transition-colors hover:bg-slate-100', isActive ? 'text-brand' : 'text-slate-600')
-      }
+      sx={{ display: 'flex', flexDirection: 'column', minWidth: 56, py: 0.5, color: 'text.secondary' }}
     >
-      <Icon className="size-6" />
-      <span className="hidden sm:block">{label}</span>
-      {badge ? (
-        <span className="absolute right-1 top-0 flex min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[11px] font-bold leading-5 text-white">{badge}</span>
-      ) : null}
-    </NavLink>
+      <Badge badgeContent={badge} color="error">
+        {icon}
+      </Badge>
+      <Typography variant="caption">{label}</Typography>
+    </Button>
   )
 }
 
@@ -34,49 +38,47 @@ export function Header() {
   const { data: categoriesData } = useCategories()
 
   return (
-    <header className="sticky top-0 z-30 bg-white shadow-sm">
-      <Container className="flex items-center gap-3 py-2 sm:gap-6">
-        <Link to={paths.home} className="flex shrink-0 items-center gap-2 text-xl font-extrabold text-brand">
-          <Store className="size-7" />
-          <span className="hidden sm:inline">{APP_NAME}</span>
-        </Link>
-
-        <div className="min-w-0 flex-1">
-          <SearchBar />
-        </div>
-
-        <nav className="flex shrink-0 items-center" aria-label="Основное меню">
-          {isAuth ? (
-            <>
-              <NavItem to={paths.profile} icon={User} label={user?.firstName ?? 'Профиль'} />
-              <NavItem to={paths.orders} icon={Package} label="Заказы" />
-              <NavItem to={paths.favorites} icon={Heart} label="Избранное" />
-            </>
-          ) : (
-            <NavItem to={paths.login} icon={LogIn} label="Войти" />
-          )}
-          <NavItem to={paths.cart} icon={ShoppingCart} label="Корзина" badge={cartData?.cart.totalCount} />
-        </nav>
+    <AppBar position="sticky" color="inherit" elevation={1}>
+      <Container maxWidth="lg">
+        <Toolbar disableGutters sx={{ gap: 2 }}>
+          <Button component={RouterLink} to={paths.home} startIcon={<Storefront />} sx={{ color: 'primary.main', fontWeight: 800, fontSize: 20, textTransform: 'none' }}>
+            {APP_NAME}
+          </Button>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <SearchBar />
+          </Box>
+          <Box component="nav" aria-label="Основное меню" sx={{ display: 'flex', flexShrink: 0 }}>
+            {isAuth ? (
+              <>
+                <NavItem to={paths.profile} icon={<Person />} label={user?.firstName ?? 'Профиль'} />
+                <NavItem to={paths.orders} icon={<Inventory2 />} label="Заказы" />
+                <NavItem to={paths.favorites} icon={<Favorite />} label="Избранное" />
+              </>
+            ) : (
+              <NavItem to={paths.login} icon={<Login />} label="Войти" />
+            )}
+            <NavItem to={paths.cart} icon={<ShoppingCart />} label="Корзина" badge={cartData?.cart.totalCount} />
+          </Box>
+        </Toolbar>
       </Container>
-
-      <div className="border-t border-slate-100">
-        <Container>
-          <ul className="flex gap-1 overflow-x-auto py-1.5 text-sm [scrollbar-width:none]">
-            <li>
-              <Link to={paths.catalog} className="block whitespace-nowrap rounded-lg px-3 py-1 font-semibold text-brand hover:bg-brand-light">
+      <Box sx={{ borderTop: 1, borderColor: 'divider' }}>
+        <Container maxWidth="lg">
+          <Box component="ul" sx={{ display: 'flex', gap: 0.5, listStyle: 'none', m: 0, p: 1, overflowX: 'auto' }}>
+            <Box component="li">
+              <Button component={RouterLink} to={paths.catalog} size="small" sx={{ whiteSpace: 'nowrap' }}>
                 Все товары
-              </Link>
-            </li>
-            {categoriesData?.categories.map((c) => (
-              <li key={c.id}>
-                <Link to={`${paths.catalog}?category=${c.slug}`} className="block whitespace-nowrap rounded-lg px-3 py-1 text-slate-700 hover:bg-slate-100">
-                  {c.icon} {c.name}
-                </Link>
-              </li>
+              </Button>
+            </Box>
+            {categoriesData?.categories.map((category) => (
+              <Box component="li" key={category.id}>
+                <Button component={RouterLink} to={`${paths.catalog}?category=${category.slug}`} size="small" color="inherit" sx={{ whiteSpace: 'nowrap' }}>
+                  {category.icon} {category.name}
+                </Button>
+              </Box>
             ))}
-          </ul>
+          </Box>
         </Container>
-      </div>
-    </header>
+      </Box>
+    </AppBar>
   )
 }

@@ -1,9 +1,8 @@
-import { MessageSquare } from 'lucide-react'
+import { Alert, Box, Button, CircularProgress, List, Typography } from '@mui/material'
 import { ReviewItem, useReviews } from '@/entities/review'
 import { useIsAuthenticated } from '@/entities/session'
 import { ReviewForm } from '@/features/create-review'
 import { getErrorMessage } from '@/shared/lib'
-import { EmptyState, ErrorState, PageLoader } from '@/shared/ui'
 
 /** Блок отзывов товара: список, форма для вошедших и все состояния загрузки. */
 export function ProductReviews({ productId }: { productId: string }) {
@@ -11,25 +10,29 @@ export function ProductReviews({ productId }: { productId: string }) {
   const isAuth = useIsAuthenticated()
 
   return (
-    <section className="space-y-4">
-      <h2 className="text-xl font-bold">Отзывы ({data?.reviews.length ?? 0})</h2>
+    <Box sx={{ display: 'grid', gap: 2 }}>
+      <Typography component="h2" variant="h5">
+        Отзывы ({data?.reviews.length ?? 0})
+      </Typography>
       {isAuth && <ReviewForm productId={productId} />}
 
       {!data ? (
         loading ? (
-          <PageLoader />
+          <CircularProgress sx={{ justifySelf: 'center' }} />
         ) : (
-          <ErrorState message={error ? getErrorMessage(error) : 'Не удалось загрузить отзывы'} onRetry={() => void refetch()} />
+          <Alert severity="error" action={<Button size="small" onClick={() => void refetch()}>Повторить</Button>}>
+            {error ? getErrorMessage(error) : 'Не удалось загрузить отзывы'}
+          </Alert>
         )
       ) : data.reviews.length === 0 ? (
-        <EmptyState icon={<MessageSquare className="size-8" />} title="Отзывов пока нет" description="Станьте первым, кто оставит отзыв о товаре." />
+        <Typography color="text.secondary">Отзывов пока нет</Typography>
       ) : (
-        <ul className="space-y-3">
+        <List sx={{ display: 'grid', gap: 1.5, p: 0 }}>
           {data.reviews.map((review) => (
             <ReviewItem key={review.id} review={review} />
           ))}
-        </ul>
+        </List>
       )}
-    </section>
+    </Box>
   )
 }

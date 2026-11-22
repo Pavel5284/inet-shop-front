@@ -1,9 +1,9 @@
+import { Alert, Box, Button, CircularProgress, List, ListItem, Typography } from '@mui/material'
 import { useCart } from '@/entities/cart'
 import { Price } from '@/entities/product'
 import { useMe } from '@/entities/user'
 import { CheckoutForm } from '@/features/place-order'
-import { usePageTitle } from '@/shared/lib'
-import { ErrorState, PageLoader, SafeImage } from '@/shared/ui'
+import { IMAGE_FALLBACK, usePageTitle } from '@/shared/lib'
 import { CartSummary } from '@/widgets/cart-summary'
 
 export function CheckoutPage() {
@@ -15,22 +15,32 @@ export function CheckoutPage() {
 
   if (!user || !cartData) {
     return me.loading || cart.loading ? (
-      <PageLoader />
+      <CircularProgress sx={{ display: 'block', mx: 'auto', my: 6 }} />
     ) : (
-      <ErrorState
-        message="Не удалось загрузить данные оформления"
-        onRetry={() => {
-          void me.refetch()
-          void cart.refetch()
-        }}
-      />
+      <Alert
+        severity="error"
+        action={
+          <Button
+            onClick={() => {
+              void me.refetch()
+              void cart.refetch()
+            }}
+          >
+            Повторить
+          </Button>
+        }
+      >
+        Не удалось загрузить данные оформления
+      </Alert>
     )
   }
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-bold">Оформление заказа</h1>
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+    <Box sx={{ display: 'grid', gap: 2.5 }}>
+      <Typography component="h1" variant="h4">
+        Оформление заказа
+      </Typography>
+      <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { xs: '1fr', lg: '1fr 340px' } }}>
         <CheckoutForm
           key={user.id}
           defaults={{
@@ -40,22 +50,34 @@ export function CheckoutPage() {
           }}
         />
 
-        <div className="space-y-4">
+        <Box sx={{ display: 'grid', gap: 2, alignContent: 'start' }}>
           <CartSummary cart={cartData} />
-          <ul className="space-y-2 rounded-2xl bg-white p-4 shadow-sm">
+          <List sx={{ p: 2, m: 0 }}>
             {cartData.items.map((item) => (
-              <li key={item.id} className="flex items-center gap-3">
-                <SafeImage src={item.product.images[0]} alt="" className="size-12 rounded-lg" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{item.product.title}</p>
-                  <p className="text-xs text-slate-400">{item.quantity} шт.</p>
-                </div>
-                <Price price={item.lineTotal} className="text-sm" />
-              </li>
+              <ListItem key={item.id} sx={{ display: 'flex', gap: 1.5, px: 0 }}>
+                <Box
+                  component="img"
+                  src={item.product.images[0] ?? IMAGE_FALLBACK}
+                  alt=""
+                  onError={(event) => {
+                    event.currentTarget.src = IMAGE_FALLBACK
+                  }}
+                  sx={{ width: 48, height: 48, borderRadius: 1, objectFit: 'cover' }}
+                />
+                <Box sx={{ minWidth: 0, flex: 1 }}>
+                  <Typography variant="body2" noWrap>
+                    {item.product.title}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {item.quantity} шт.
+                  </Typography>
+                </Box>
+                <Price price={item.lineTotal} />
+              </ListItem>
             ))}
-          </ul>
-        </div>
-      </div>
-    </div>
+          </List>
+        </Box>
+      </Box>
+    </Box>
   )
 }

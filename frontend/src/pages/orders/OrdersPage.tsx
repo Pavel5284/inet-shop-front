@@ -1,44 +1,46 @@
-import { Package } from 'lucide-react'
-import { Link } from 'react-router'
+import { Alert, Box, Button, CircularProgress, List, ListItem, ListItemButton, Typography } from '@mui/material'
+import { Link as RouterLink } from 'react-router'
 import { OrderStatusBadge, useOrders } from '@/entities/order'
 import { paths } from '@/shared/config'
 import { formatDate, formatPrice, usePageTitle } from '@/shared/lib'
-import { EmptyState, ErrorState, PageLoader } from '@/shared/ui'
 
 export function OrdersPage() {
   usePageTitle('Мои заказы')
   const { data, loading, error, refetch } = useOrders()
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-bold">Мои заказы</h1>
+    <Box sx={{ display: 'grid', gap: 2 }}>
+      <Typography component="h1" variant="h4">
+        Мои заказы
+      </Typography>
       {!data ? (
         loading ? (
-          <PageLoader />
+          <CircularProgress sx={{ justifySelf: 'center' }} />
         ) : (
-          <ErrorState message={error ? 'Не удалось загрузить заказы' : 'Заказы недоступны'} onRetry={() => void refetch()} />
+          <Alert severity="error" action={<Button onClick={() => void refetch()}>Повторить</Button>}>
+            {error ? 'Не удалось загрузить заказы' : 'Заказы недоступны'}
+          </Alert>
         )
       ) : data.orders.length === 0 ? (
-        <EmptyState icon={<Package className="size-8" />} title="Заказов пока нет" description="Здесь появятся ваши заказы." />
+        <Typography color="text.secondary">Заказов пока нет</Typography>
       ) : (
-        <ul className="space-y-3">
+        <List sx={{ display: 'grid', gap: 1.5, p: 0 }}>
           {data.orders.map((order) => (
-            <li key={order.id}>
-              <Link
-                to={paths.order(order.id)}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
-              >
-                <div>
-                  <span className="font-semibold">Заказ №{order.number}</span>
-                  <p className="text-xs text-slate-400">{formatDate(order.createdAt)}</p>
-                </div>
+            <ListItem key={order.id} disableGutters sx={{ p: 0 }}>
+              <ListItemButton component={RouterLink} to={paths.order(order.id)} sx={{ bgcolor: 'background.paper', borderRadius: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography>{`Заказ №${order.number}`}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {formatDate(order.createdAt)}
+                  </Typography>
+                </Box>
                 <OrderStatusBadge status={order.status} />
-                <span className="font-bold">{formatPrice(order.totalPrice)}</span>
-              </Link>
-            </li>
+                <Typography>{formatPrice(order.totalPrice)}</Typography>
+              </ListItemButton>
+            </ListItem>
           ))}
-        </ul>
+        </List>
       )}
-    </div>
+    </Box>
   )
 }

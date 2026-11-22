@@ -1,7 +1,7 @@
+import { Alert, Box, Button, CircularProgress, Typography } from '@mui/material'
 import { CategoryTile, useCategories } from '@/entities/category'
 import { useProducts } from '@/entities/product'
 import { usePageTitle } from '@/shared/lib'
-import { ErrorState, PageLoader } from '@/shared/ui'
 import { ProductGrid } from '@/widgets/product-grid'
 
 export function HomePage() {
@@ -11,51 +11,64 @@ export function HomePage() {
   const categories = useCategories()
 
   return (
-    <div className="space-y-9">
-      <section className="rounded-3xl bg-gradient-to-r from-brand to-brand-dark px-6 py-10 text-white sm:px-10">
-        <h1 className="text-3xl font-extrabold sm:text-4xl">Всё, что нужно, — в одном магазине</h1>
-        <p className="mt-3 max-w-xl text-white/80">Электроника, одежда, товары для дома и многое другое с быстрой доставкой.</p>
-      </section>
+    <Box sx={{ display: 'grid', gap: 4 }}>
+      <Box sx={{ borderRadius: 4, background: 'linear-gradient(90deg, #005bff, #0047cc)', color: 'white', px: { xs: 3, sm: 5 }, py: 5 }}>
+        <Typography component="h1" variant="h4">
+          Всё, что нужно, — в одном магазине
+        </Typography>
+        <Typography sx={{ mt: 1.5, maxWidth: 560, color: 'rgba(255,255,255,0.8)' }}>
+          Электроника, одежда, товары для дома и многое другое с быстрой доставкой.
+        </Typography>
+      </Box>
 
-      <section>
-        <h2 className="mb-4 text-2xl font-bold">Категории</h2>
+      <Box component="section">
+        <Typography component="h2" variant="h5" sx={{ mb: 2 }}>
+          Категории
+        </Typography>
         {categories.data ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', lg: 'repeat(6, 1fr)' }, gap: 1.5 }}>
             {categories.data.categories.map((category) => (
               <CategoryTile key={category.id} category={category} />
             ))}
-          </div>
+          </Box>
         ) : categories.loading ? (
-          <PageLoader />
+          <CircularProgress sx={{ display: 'block', mx: 'auto', my: 4 }} />
         ) : (
-          <ErrorState
-            message={categories.error ? 'Не удалось загрузить категории' : 'Категории недоступны'}
-            onRetry={() => void categories.refetch()}
-          />
+          <Alert severity="error" action={<Button onClick={() => void categories.refetch()}>Повторить</Button>}>
+            Не удалось загрузить категории
+          </Alert>
         )}
-      </section>
+      </Box>
 
-      <section>
-        <h2 className="mb-4 text-2xl font-bold">Популярное</h2>
+      <Box component="section">
+        <Typography component="h2" variant="h5" sx={{ mb: 2 }}>
+          Популярное
+        </Typography>
         {popular.data ? (
           <ProductGrid products={popular.data.products.items} loading={popular.loading} />
         ) : popular.loading ? (
-          <PageLoader />
+          <CircularProgress sx={{ display: 'block', mx: 'auto', my: 4 }} />
         ) : (
-          <ErrorState message="Не удалось загрузить товары" onRetry={() => void popular.refetch()} />
+          <Alert severity="error" action={<Button onClick={() => void popular.refetch()}>Повторить</Button>}>
+            Не удалось загрузить товары
+          </Alert>
         )}
-      </section>
+      </Box>
 
-      <section>
-        <h2 className="mb-4 text-2xl font-bold">Новинки</h2>
+      <Box component="section">
+        <Typography component="h2" variant="h5" sx={{ mb: 2 }}>
+          Новинки
+        </Typography>
         {newest.data ? (
           <ProductGrid products={newest.data.products.items} loading={newest.loading} />
         ) : newest.loading ? (
-          <PageLoader />
+          <CircularProgress sx={{ display: 'block', mx: 'auto', my: 4 }} />
         ) : (
-          <ErrorState message="Не удалось загрузить новинки" onRetry={() => void newest.refetch()} />
+          <Alert severity="error" action={<Button onClick={() => void newest.refetch()}>Повторить</Button>}>
+            Не удалось загрузить новинки
+          </Alert>
         )}
-      </section>
-    </div>
+      </Box>
+    </Box>
   )
 }

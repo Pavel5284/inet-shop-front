@@ -1,9 +1,9 @@
+import { Alert, Box, Button, CircularProgress, Paper, Rating, Typography } from '@mui/material'
 import { useParams } from 'react-router'
 import { AddToCartButton } from '@/features/add-to-cart'
 import { FavoriteButton } from '@/features/toggle-favorite'
 import { useProduct, useProducts, Price } from '@/entities/product'
-import { pluralize, usePageTitle } from '@/shared/lib'
-import { ErrorState, PageLoader, RatingStars, SafeImage } from '@/shared/ui'
+import { IMAGE_FALLBACK, pluralize, usePageTitle } from '@/shared/lib'
 import { ProductGrid } from '@/widgets/product-grid'
 import { ProductReviews } from '@/widgets/product-reviews'
 
@@ -21,64 +21,87 @@ export function ProductPage() {
 
   if (!product) {
     return loading ? (
-      <PageLoader />
+      <CircularProgress sx={{ display: 'block', mx: 'auto', my: 6 }} />
     ) : (
-      <ErrorState
-        message={error ? 'Товар не найден' : 'Не удалось загрузить товар'}
-        onRetry={() => void refetch()}
-      />
+      <Alert severity="error" action={<Button onClick={() => void refetch()}>Повторить</Button>}>
+        {error ? 'Товар не найден' : 'Не удалось загрузить товар'}
+      </Alert>
     )
   }
 
   return (
-    <div className="space-y-8">
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,440px)_1fr]">
-        <div className="rounded-2xl bg-white p-4 shadow-sm">
-          <SafeImage src={product.images[0]} alt={product.title} className="aspect-square w-full rounded-xl" />
-          <div className="mt-3 flex gap-2 overflow-x-auto">
+    <Box sx={{ display: 'grid', gap: 4 }}>
+      <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { xs: '1fr', lg: '440px 1fr' } }}>
+        <Paper sx={{ p: 2 }}>
+          <Box
+            component="img"
+            src={product.images[0] ?? IMAGE_FALLBACK}
+            alt={product.title}
+            onError={(event) => {
+              event.currentTarget.src = IMAGE_FALLBACK
+            }}
+            sx={{ width: 1, aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 2 }}
+          />
+          <Box sx={{ display: 'flex', gap: 1, mt: 1.5, overflowX: 'auto' }}>
             {product.images.slice(1).map((image) => (
-              <SafeImage key={image} src={image} alt="" className="size-16 shrink-0 rounded-lg" />
+              <Box
+                component="img"
+                key={image}
+                src={image}
+                alt=""
+                onError={(event) => {
+                  event.currentTarget.src = IMAGE_FALLBACK
+                }}
+                sx={{ width: 64, height: 64, borderRadius: 1, objectFit: 'cover', flexShrink: 0 }}
+              />
             ))}
-          </div>
-        </div>
+          </Box>
+        </Paper>
 
-        <div className="space-y-4">
-          <p className="text-sm text-slate-400">{product.brand}</p>
-          <h1 className="text-2xl font-bold sm:text-3xl">{product.title}</h1>
-          <div className="flex items-center gap-3 text-sm text-slate-600">
-            <RatingStars rating={product.rating} />
-            <span>{product.rating.toFixed(1)}</span>
-            <span>
+        <Box sx={{ display: 'grid', alignContent: 'start', gap: 1.5 }}>
+          <Typography variant="body2" color="text.secondary">
+            {product.brand}
+          </Typography>
+          <Typography component="h1" variant="h4">
+            {product.title}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Rating value={product.rating} precision={0.1} readOnly size="small" />
+            <Typography variant="body2">{product.rating.toFixed(1)}</Typography>
+            <Typography variant="body2" color="text.secondary">
               {product.reviewsCount} {pluralize(product.reviewsCount, ['отзыв', 'отзыва', 'отзывов'])}
-            </span>
-          </div>
-          <Price price={product.price} oldPrice={product.oldPrice} className="text-2xl" />
-          <p className="text-sm text-slate-500">
+            </Typography>
+          </Box>
+          <Price price={product.price} oldPrice={product.oldPrice} />
+          <Typography variant="body2" color="text.secondary">
             {product.stock > 0 ? `В наличии: ${product.stock} шт.` : 'Нет в наличии'}
-          </p>
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, mt: 1 }}>
+            {product.stock > 0 && (
+              <Box sx={{ minWidth: 224 }}>
+                <AddToCartButton product={product} size="lg" />
+              </Box>
+            )}
+            <FavoriteButton productId={product.id} />
+          </Box>
+        </Box>
+      </Box>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {product.stock > 0 && <div className="min-w-56"><AddToCartButton product={product} size="lg" /></div>}
-            <FavoriteButton productId={product.id} className="size-11 border border-slate-200" />
-          </div>
-        </div>
-      </div>
-
-      <section className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
-        <h2 className="mb-3 text-xl font-bold">Описание</h2>
-        <p className="leading-7 text-slate-700">{product.description}</p>
-      </section>
+      <Paper component="section" sx={{ p: 3 }}>
+        <Typography component="h2" variant="h5" gutterBottom>
+          Описание
+        </Typography>
+        <Typography sx={{ lineHeight: 1.8 }}>{product.description}</Typography>
+      </Paper>
 
       <ProductReviews productId={product.id} />
 
-      <section>
-        <h2 className="mb-4 text-xl font-bold">Похожие товары</h2>
-        <ProductGrid
-          products={related.data?.products.items.filter((p) => p.id !== product.id)}
-          loading={related.loading && !related.data}
-          skeletons={5}
-        />
-      </section>
-    </div>
+      <Box component="section">
+        <Typography component="h2" variant="h5" sx={{ mb: 2 }}>
+          Похожие товары
+        </Typography>
+        <ProductGrid products={related.data?.products.items.filter((item) => item.id !== product.id)} loading={related.loading && !related.data} skeletons={5} />
+      </Box>
+    </Box>
   )
 }

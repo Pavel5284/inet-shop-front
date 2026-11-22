@@ -1,5 +1,5 @@
+import { CircularProgress } from '@mui/material'
 import { createBrowserRouter } from 'react-router'
-import { PageLoader } from '@/shared/ui'
 import { RootLayout, RouteError } from '../layouts/RootLayout'
 import { RequireAuth } from './RequireAuth'
 
@@ -12,7 +12,7 @@ export const router = createBrowserRouter([
     path: '/',
     Component: RootLayout,
     ErrorBoundary: RouteError,
-    HydrateFallback: PageLoader, // индикатор, пока грузится код первой страницы
+    HydrateFallback: () => <CircularProgress sx={{ display: 'block', mx: 'auto', my: 8 }} />, // индикатор, пока грузится код первой страницы
     children: [
       { index: true, lazy: async () => ({ Component: (await import('@/pages/home')).HomePage }) },
       { path: 'catalog', lazy: async () => ({ Component: (await import('@/pages/catalog')).CatalogPage }) },

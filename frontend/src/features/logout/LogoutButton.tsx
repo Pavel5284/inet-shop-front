@@ -1,12 +1,11 @@
-import { LogOut } from 'lucide-react'
-import { Button } from '@/shared/ui'
+import { Logout } from '@mui/icons-material'
+import { Button } from '@mui/material'
 import { useLogout } from './useLogout'
 
 export function LogoutButton() {
   const logout = useLogout()
   return (
-    <Button variant="outline" onClick={logout}>
-      <LogOut className="size-4" />
+    <Button variant="outlined" startIcon={<Logout />} onClick={logout}>
       Выйти
     </Button>
   )

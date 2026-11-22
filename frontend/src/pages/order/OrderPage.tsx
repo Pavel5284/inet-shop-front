@@ -1,8 +1,8 @@
+import { Alert, Box, Button, CircularProgress, Divider, List, ListItem, Paper, Typography } from '@mui/material'
 import { useParams } from 'react-router'
 import { OrderStatusBadge, useOrder } from '@/entities/order'
 import { OrderActions } from '@/features/order-actions'
-import { formatDate, formatPrice, usePageTitle } from '@/shared/lib'
-import { ErrorState, PageLoader, SafeImage } from '@/shared/ui'
+import { formatDate, formatPrice, IMAGE_FALLBACK, usePageTitle } from '@/shared/lib'
 
 export function OrderPage() {
   usePageTitle('Заказ')
@@ -12,62 +12,93 @@ export function OrderPage() {
 
   if (!order) {
     return loading ? (
-      <PageLoader />
+      <CircularProgress sx={{ display: 'block', mx: 'auto', my: 6 }} />
     ) : (
-      <ErrorState message={error ? 'Заказ не найден' : 'Не удалось загрузить заказ'} onRetry={() => void refetch()} />
+      <Alert severity="error" action={<Button onClick={() => void refetch()}>Повторить</Button>}>
+        {error ? 'Заказ не найден' : 'Не удалось загрузить заказ'}
+      </Alert>
     )
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-bold">Заказ №{order.number}</h1>
+    <Box sx={{ display: 'grid', gap: 2.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
+        <Typography component="h1" variant="h4">
+          {`Заказ №${order.number}`}
+        </Typography>
         <OrderStatusBadge status={order.status} />
-      </div>
-      <p className="text-sm text-slate-500">Оформлен {formatDate(order.createdAt)}</p>
+      </Box>
+      <Typography variant="body2" color="text.secondary">
+        {`Оформлен ${formatDate(order.createdAt)}`}
+      </Typography>
 
       <OrderActions order={order} />
 
-      <section className="rounded-2xl bg-white p-5 shadow-sm">
-        <h2 className="mb-3 text-lg font-bold">Состав заказа</h2>
-        <ul className="space-y-3">
+      <Paper sx={{ p: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Состав заказа
+        </Typography>
+        <List sx={{ p: 0 }}>
           {order.items.map((item) => (
-            <li key={item.id} className="flex items-center gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-              <SafeImage src={item.image} alt="" className="size-14 rounded-lg" />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{item.title}</p>
-                <p className="text-xs text-slate-400">{item.quantity} шт. × {formatPrice(item.price)}</p>
-              </div>
-              <span className="text-sm font-semibold">{formatPrice(item.lineTotal)}</span>
-            </li>
+            <ListItem key={item.id} sx={{ display: 'flex', gap: 1.5, px: 0, borderBottom: 1, borderColor: 'divider' }}>
+              <Box
+                component="img"
+                src={item.image ?? IMAGE_FALLBACK}
+                alt=""
+                onError={(event) => {
+                  event.currentTarget.src = IMAGE_FALLBACK
+                }}
+                sx={{ width: 56, height: 56, borderRadius: 1, objectFit: 'cover' }}
+              />
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography variant="body2" noWrap>
+                  {item.title}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {`${item.quantity} шт. × ${formatPrice(item.price)}`}
+                </Typography>
+              </Box>
+              <Typography variant="body2">
+                {formatPrice(item.lineTotal)}
+              </Typography>
+            </ListItem>
           ))}
-        </ul>
-        <div className="mt-4 flex justify-between border-t border-slate-100 pt-4 text-lg font-bold">
-          <span>Итого</span>
-          <span>{formatPrice(order.totalPrice)}</span>
-        </div>
-      </section>
+        </List>
+        <Divider sx={{ my: 2 }} />
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography>Итого</Typography>
+          <Typography>{formatPrice(order.totalPrice)}</Typography>
+        </Box>
+      </Paper>
 
-      <section className="grid gap-3 rounded-2xl bg-white p-5 text-sm shadow-sm sm:grid-cols-2">
-        <div>
-          <p className="text-slate-400">Получатель</p>
-          <p className="font-medium">{order.recipientName}</p>
-        </div>
-        <div>
-          <p className="text-slate-400">Телефон</p>
-          <p className="font-medium">{order.phone}</p>
-        </div>
-        <div>
-          <p className="text-slate-400">Адрес доставки</p>
-          <p className="font-medium">{order.address}</p>
-        </div>
+      <Paper sx={{ p: 3, display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
+        <Box>
+          <Typography variant="caption" color="text.secondary">
+            Получатель
+          </Typography>
+          <Typography>{order.recipientName}</Typography>
+        </Box>
+        <Box>
+          <Typography variant="caption" color="text.secondary">
+            Телефон
+          </Typography>
+          <Typography>{order.phone}</Typography>
+        </Box>
+        <Box>
+          <Typography variant="caption" color="text.secondary">
+            Адрес доставки
+          </Typography>
+          <Typography>{order.address}</Typography>
+        </Box>
         {order.comment && (
-          <div>
-            <p className="text-slate-400">Комментарий курьеру</p>
-            <p className="font-medium">{order.comment}</p>
-          </div>
+          <Box>
+            <Typography variant="caption" color="text.secondary">
+              Комментарий курьеру
+            </Typography>
+            <Typography>{order.comment}</Typography>
+          </Box>
         )}
-      </section>
-    </div>
+      </Paper>
+    </Box>
   )
 }
