@@ -1,6 +1,7 @@
-import { Button, Checkbox, FormControlLabel, MenuItem, Paper, TextField, Typography } from '@mui/material'
+import { Button, Checkbox, FormControlLabel, ListItemIcon, MenuItem, Paper, TextField, Typography } from '@mui/material'
+import { createElement } from 'react'
 import { useSearchParams } from 'react-router'
-import { useCategories } from '@/entities/category'
+import { categoryIcon, useCategories } from '@/entities/category'
 import { SORT_OPTIONS } from '@/entities/product'
 
 function useChangeParam() {
@@ -21,7 +22,7 @@ export function CatalogFilters() {
   const { data } = useCategories()
   const categoryOptions = [
     { value: '', label: 'Все категории' },
-    ...(data?.categories.map((category) => ({ value: category.slug, label: `${category.icon} ${category.name}` })) ?? []),
+    ...(data?.categories.map((category) => ({ value: category.slug, label: category.name })) ?? []),
   ]
 
   return (
@@ -39,6 +40,7 @@ export function CatalogFilters() {
       >
         {categoryOptions.map((option) => (
           <MenuItem key={option.value} value={option.value}>
+            <ListItemIcon>{createElement(categoryIcon(option.value), { fontSize: 'small', color: 'primary' })}</ListItemIcon>
             {option.label}
           </MenuItem>
         ))}

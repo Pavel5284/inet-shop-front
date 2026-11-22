@@ -1,9 +1,9 @@
 import { Favorite, Inventory2, Login, ShoppingCart, Storefront, Person } from '@mui/icons-material'
 import { AppBar, Badge, Box, Button, Container, Toolbar, Typography } from '@mui/material'
-import type { ReactNode } from 'react'
+import { createElement, type ReactNode } from 'react'
 import { Link as RouterLink, NavLink } from 'react-router'
 import { useCart } from '@/entities/cart'
-import { useCategories } from '@/entities/category'
+import { categoryIcon, useCategories } from '@/entities/category'
 import { useIsAuthenticated, useSessionUser } from '@/entities/session'
 import { SearchBar } from '@/features/search-products'
 import { APP_NAME, paths } from '@/shared/config'
@@ -71,8 +71,15 @@ export function Header() {
             </Box>
             {categoriesData?.categories.map((category) => (
               <Box component="li" key={category.id}>
-                <Button component={RouterLink} to={`${paths.catalog}?category=${category.slug}`} size="small" color="inherit" sx={{ whiteSpace: 'nowrap' }}>
-                  {category.icon} {category.name}
+                <Button
+                  component={RouterLink}
+                  to={`${paths.catalog}?category=${category.slug}`}
+                  size="small"
+                  color="inherit"
+                  startIcon={createElement(categoryIcon(category.slug), { fontSize: 'small' })}
+                  sx={{ whiteSpace: 'nowrap' }}
+                >
+                  {category.name}
                 </Button>
               </Box>
             ))}
