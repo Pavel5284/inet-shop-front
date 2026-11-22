@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --color-brand: #005bff;
+  --color-brand-dark: #0047cc;
+  --color-brand-light: #e8f0ff;
+  --color-accent: #f91155;
+}
+
+body {
+  background-color: #f1f3f7;
+  color: #0f172a;
+}
