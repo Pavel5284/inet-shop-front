@@ -1,4 +1,5 @@
-import { Alert, Box, Button, CircularProgress, Paper, Rating, Typography } from '@mui/material'
+import { Alert, Box, Button, ButtonBase, CircularProgress, Paper, Rating, Typography } from '@mui/material'
+import { useState } from 'react'
 import { useParams } from 'react-router'
 import { AddToCartButton } from '@/features/add-to-cart'
 import { FavoriteButton } from '@/features/toggle-favorite'
@@ -18,6 +19,10 @@ export function ProductPage() {
     pageSize: 6,
     sort: 'POPULAR',
   })
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const images = product?.images.length ? product.images : [IMAGE_FALLBACK]
+  // Если открыли другой товар, старый выбор просто не подходит — берём первое фото.
+  const currentImage = images.includes(selectedImage ?? '') ? (selectedImage as string) : images[0]
 
   if (!product) {
     return loading ? (
@@ -35,7 +40,7 @@ export function ProductPage() {
         <Paper sx={{ p: 2 }}>
           <Box
             component="img"
-            src={product.images[0] ?? IMAGE_FALLBACK}
+            src={currentImage}
             alt={product.title}
             onError={(event) => {
               event.currentTarget.src = IMAGE_FALLBACK
@@ -43,17 +48,30 @@ export function ProductPage() {
             sx={{ width: 1, aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 2 }}
           />
           <Box sx={{ display: 'flex', gap: 1, mt: 1.5, overflowX: 'auto' }}>
-            {product.images.slice(1).map((image) => (
-              <Box
-                component="img"
-                key={image}
-                src={image}
-                alt=""
-                onError={(event) => {
-                  event.currentTarget.src = IMAGE_FALLBACK
+            {images.map((image, index) => (
+              <ButtonBase
+                key={`${image}-${index}`}
+                aria-label={`Показать изображение ${index + 1}`}
+                aria-pressed={image === currentImage}
+                onClick={() => setSelectedImage(image)}
+                sx={{
+                  p: 0,
+                  border: 2,
+                  borderColor: image === currentImage ? 'primary.main' : 'transparent',
+                  borderRadius: 1,
+                  flexShrink: 0,
                 }}
-                sx={{ width: 64, height: 64, borderRadius: 1, objectFit: 'cover', flexShrink: 0 }}
-              />
+              >
+                <Box
+                  component="img"
+                  src={image}
+                  alt=""
+                  onError={(event) => {
+                    event.currentTarget.src = IMAGE_FALLBACK
+                  }}
+                  sx={{ width: 60, height: 60, borderRadius: 0.5, objectFit: 'cover', display: 'block' }}
+                />
+              </ButtonBase>
             ))}
           </Box>
         </Paper>
