@@ -34,6 +34,8 @@ export function ProductPage() {
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     swipeStartX.current = event.clientX
+    // Чтобы pointerup пришёл сюда даже если курсор ушёл за пределы картинки.
+    event.currentTarget.setPointerCapture(event.pointerId)
   }
   const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
     const start = swipeStartX.current
@@ -60,10 +62,15 @@ export function ProductPage() {
           <Box
             onPointerDown={onPointerDown}
             onPointerUp={onPointerUp}
-            sx={{ position: 'relative', touchAction: 'pan-y', cursor: images.length > 1 ? 'grab' : 'default' }}
+            onPointerCancel={() => {
+              swipeStartX.current = null
+            }}
+            onDragStart={(event) => event.preventDefault()}
+            sx={{ position: 'relative', touchAction: 'pan-y', cursor: images.length > 1 ? 'grab' : 'default', '&:active': { cursor: 'grabbing' } }}
           >
             <Box
               component="img"
+              draggable={false}
               src={currentImage}
               alt={product.title}
               onError={(event) => {
@@ -111,6 +118,7 @@ export function ProductPage() {
               >
                 <Box
                   component="img"
+                  draggable={false}
                   src={image}
                   alt=""
                   onError={(event) => {
