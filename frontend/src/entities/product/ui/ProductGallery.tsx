@@ -28,8 +28,15 @@ export function ProductGallery({ images, alt, zoomable = false }: ProductGallery
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     swipeStartX.current = event.clientX
-    // Чтобы pointerup пришёл сюда даже если курсор ушёл за пределы картинки.
-    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const start = swipeStartX.current
+    if (start === null || Math.abs(event.clientX - start) < 10) return
+    // Захватываем указатель только когда начался свайп: иначе click по картинке
+    // был бы переадресован на контейнер и попап не открывался.
+    if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.setPointerCapture(event.pointerId)
+    }
   }
   const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
     const start = swipeStartX.current
@@ -43,6 +50,7 @@ export function ProductGallery({ images, alt, zoomable = false }: ProductGallery
     <Box>
       <Box
         onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={() => {
           swipeStartX.current = null
