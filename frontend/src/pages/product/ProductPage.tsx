@@ -1,5 +1,6 @@
-import { Alert, Box, Button, ButtonBase, CircularProgress, Paper, Rating, Typography } from '@mui/material'
-import { useState } from 'react'
+import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material'
+import { Alert, Box, Button, ButtonBase, CircularProgress, IconButton, Paper, Rating, Typography } from '@mui/material'
+import { useRef, useState, type PointerEvent } from 'react'
 import { useParams } from 'react-router'
 import { AddToCartButton } from '@/features/add-to-cart'
 import { FavoriteButton } from '@/features/toggle-favorite'
@@ -20,9 +21,27 @@ export function ProductPage() {
     sort: 'POPULAR',
   })
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const swipeStartX = useRef<number | null>(null)
   const images = product?.images.length ? product.images : [IMAGE_FALLBACK]
   // Если открыли другой товар, старый выбор просто не подходит — берём первое фото.
   const currentImage = images.includes(selectedImage ?? '') ? (selectedImage as string) : images[0]
+  const currentIndex = Math.max(0, images.indexOf(currentImage))
+
+  const step = (delta: number) => {
+    if (images.length < 2) return
+    setSelectedImage(images[(currentIndex + delta + images.length) % images.length])
+  }
+
+  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    swipeStartX.current = event.clientX
+  }
+  const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const start = swipeStartX.current
+    swipeStartX.current = null
+    if (start === null) return
+    const delta = event.clientX - start
+    if (Math.abs(delta) > 40) step(delta < 0 ? 1 : -1)
+  }
 
   if (!product) {
     return loading ? (
@@ -39,14 +58,42 @@ export function ProductPage() {
       <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { xs: '1fr', lg: '440px 1fr' } }}>
         <Paper sx={{ p: 2 }}>
           <Box
-            component="img"
-            src={currentImage}
-            alt={product.title}
-            onError={(event) => {
-              event.currentTarget.src = IMAGE_FALLBACK
-            }}
-            sx={{ width: 1, aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 2 }}
-          />
+            onPointerDown={onPointerDown}
+            onPointerUp={onPointerUp}
+            sx={{ position: 'relative', touchAction: 'pan-y', cursor: images.length > 1 ? 'grab' : 'default' }}
+          >
+            <Box
+              component="img"
+              src={currentImage}
+              alt={product.title}
+              onError={(event) => {
+                event.currentTarget.src = IMAGE_FALLBACK
+              }}
+              sx={{ width: 1, aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 2, display: 'block', userSelect: 'none' }}
+            />
+            {images.length > 1 && (
+              <>
+                <IconButton
+                  aria-label="Предыдущее изображение"
+                  onClick={() => step(-1)}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onPointerUp={(event) => event.stopPropagation()}
+                  sx={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'background.paper' }}
+                >
+                  <KeyboardArrowLeft />
+                </IconButton>
+                <IconButton
+                  aria-label="Следующее изображение"
+                  onClick={() => step(1)}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onPointerUp={(event) => event.stopPropagation()}
+                  sx={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'background.paper' }}
+                >
+                  <KeyboardArrowRight />
+                </IconButton>
+              </>
+            )}
+          </Box>
           <Box sx={{ display: 'flex', gap: 1, mt: 1.5, overflowX: 'auto' }}>
             {images.map((image, index) => (
               <ButtonBase
