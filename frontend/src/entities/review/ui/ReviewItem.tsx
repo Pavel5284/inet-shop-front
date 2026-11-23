@@ -12,7 +12,7 @@ export function ReviewItem({ review }: { review: Review }) {
         <Typography variant="caption" color="text.secondary">
           {formatDate(review.createdAt)}
         </Typography>
-        <Rating value={review.rating} readOnly size="small" sx={{ display: 'block', my: 0.5 }} />
+        <Rating value={review.rating} readOnly size="small" sx={{ display: 'inline-flex', my: 0.5 }} />
         <Typography variant="body2">{review.text}</Typography>
       </CardContent>
     </Card>
