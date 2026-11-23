@@ -1,11 +1,9 @@
-import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material'
-import { Alert, Box, Button, ButtonBase, CircularProgress, IconButton, Paper, Rating, Typography } from '@mui/material'
-import { useRef, useState, type PointerEvent } from 'react'
+import { Alert, Box, Button, CircularProgress, Paper, Rating, Typography } from '@mui/material'
 import { useParams } from 'react-router'
 import { AddToCartButton } from '@/features/add-to-cart'
 import { FavoriteButton } from '@/features/toggle-favorite'
-import { useProduct, useProducts, Price } from '@/entities/product'
-import { IMAGE_FALLBACK, pluralize, usePageTitle } from '@/shared/lib'
+import { useProduct, useProducts, Price, ProductGallery } from '@/entities/product'
+import { pluralize, usePageTitle } from '@/shared/lib'
 import { ProductGrid } from '@/widgets/product-grid'
 import { ProductReviews } from '@/widgets/product-reviews'
 
@@ -20,31 +18,6 @@ export function ProductPage() {
     pageSize: 6,
     sort: 'POPULAR',
   })
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const swipeStartX = useRef<number | null>(null)
-  const images = product?.images.length ? product.images : [IMAGE_FALLBACK]
-  // Если открыли другой товар, старый выбор просто не подходит — берём первое фото.
-  const currentImage = images.includes(selectedImage ?? '') ? (selectedImage as string) : images[0]
-  const currentIndex = Math.max(0, images.indexOf(currentImage))
-
-  const step = (delta: number) => {
-    if (images.length < 2) return
-    setSelectedImage(images[(currentIndex + delta + images.length) % images.length])
-  }
-
-  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    swipeStartX.current = event.clientX
-    // Чтобы pointerup пришёл сюда даже если курсор ушёл за пределы картинки.
-    event.currentTarget.setPointerCapture(event.pointerId)
-  }
-  const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
-    const start = swipeStartX.current
-    swipeStartX.current = null
-    if (start === null) return
-    const delta = event.clientX - start
-    if (Math.abs(delta) > 40) step(delta < 0 ? 1 : -1)
-  }
-
   if (!product) {
     return loading ? (
       <CircularProgress sx={{ display: 'block', mx: 'auto', my: 6 }} />
@@ -59,76 +32,7 @@ export function ProductPage() {
     <Box sx={{ display: 'grid', gap: 4 }}>
       <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { xs: '1fr', lg: '440px 1fr' } }}>
         <Paper sx={{ p: 2 }}>
-          <Box
-            onPointerDown={onPointerDown}
-            onPointerUp={onPointerUp}
-            onPointerCancel={() => {
-              swipeStartX.current = null
-            }}
-            onDragStart={(event) => event.preventDefault()}
-            sx={{ position: 'relative', touchAction: 'pan-y', cursor: images.length > 1 ? 'grab' : 'default', '&:active': { cursor: 'grabbing' } }}
-          >
-            <Box
-              component="img"
-              draggable={false}
-              src={currentImage}
-              alt={product.title}
-              onError={(event) => {
-                event.currentTarget.src = IMAGE_FALLBACK
-              }}
-              sx={{ width: 1, aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 2, display: 'block', userSelect: 'none' }}
-            />
-            {images.length > 1 && (
-              <>
-                <IconButton
-                  aria-label="Предыдущее изображение"
-                  onClick={() => step(-1)}
-                  onPointerDown={(event) => event.stopPropagation()}
-                  onPointerUp={(event) => event.stopPropagation()}
-                  sx={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'background.paper' }}
-                >
-                  <KeyboardArrowLeft />
-                </IconButton>
-                <IconButton
-                  aria-label="Следующее изображение"
-                  onClick={() => step(1)}
-                  onPointerDown={(event) => event.stopPropagation()}
-                  onPointerUp={(event) => event.stopPropagation()}
-                  sx={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'background.paper' }}
-                >
-                  <KeyboardArrowRight />
-                </IconButton>
-              </>
-            )}
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1, mt: 1.5, overflowX: 'auto' }}>
-            {images.map((image, index) => (
-              <ButtonBase
-                key={`${image}-${index}`}
-                aria-label={`Показать изображение ${index + 1}`}
-                aria-pressed={image === currentImage}
-                onClick={() => setSelectedImage(image)}
-                sx={{
-                  p: 0,
-                  border: 2,
-                  borderColor: image === currentImage ? 'primary.main' : 'transparent',
-                  borderRadius: 1,
-                  flexShrink: 0,
-                }}
-              >
-                <Box
-                  component="img"
-                  draggable={false}
-                  src={image}
-                  alt=""
-                  onError={(event) => {
-                    event.currentTarget.src = IMAGE_FALLBACK
-                  }}
-                  sx={{ width: 60, height: 60, borderRadius: 0.5, objectFit: 'cover', display: 'block' }}
-                />
-              </ButtonBase>
-            ))}
-          </Box>
+          <ProductGallery images={product.images} alt={product.title} zoomable />
         </Paper>
 
         <Box sx={{ display: 'grid', alignContent: 'start', gap: 1.5 }}>
