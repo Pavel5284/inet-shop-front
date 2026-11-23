@@ -1,22 +1,10 @@
 # inet-shop-front
 
-Фронтенд интернет-магазина (аналог Ozon): React 19 + Vite 8 + Apollo Client 4, архитектура Feature-Sliced Design. Код лежит в `frontend/`.
+Фронтенд интернет-магазина (аналог Ozon): React 19 + Vite 8 + Apollo Client 4 + Material UI, архитектура Feature-Sliced Design. Все файлы проекта лежат в корне репозитория (`src/`, `nginx/`, `scripts/`, `Dockerfile`).
 
 ## Запуск всего стека одной командой (Docker)
 
-`docker-compose.yml` живёт в соседнем репозитории бэкенда (`../inet-shop-back`) и ожидает там папку `./frontend`. Если её нет — создайте ссылку на этот репозиторий:
-
-```powershell
-# Windows (PowerShell), из корня inet-shop-front:
-New-Item -ItemType Junction -Path ..\inet-shop-back\frontend -Target .\frontend
-```
-
-```bash
-# macOS / Linux:
-ln -s ../inet-shop-front/frontend ../inet-shop-back/frontend
-```
-
-Затем:
+`docker-compose.yml` находится в соседнем репозитории бэкенда (`../inet-shop-back`) и собирает фронтенд из этого репозитория (`context: ../inet-shop-front`):
 
 ```bash
 cd ../inet-shop-back
@@ -27,12 +15,17 @@ docker compose up --build
 - GraphQL (GraphiQL): http://localhost:3000/graphql
 - Демо-аккаунт: `demo@example.com` / `Demo12345!`
 
+Отдельно frontend-образ собирается из корня этого репозитория:
+
+```bash
+docker build -t marketplace-frontend .
+```
+
 ## Режим разработки
 
 Нужен запущенный бэкенд на `http://localhost:3000` (Vite проксирует `/graphql`):
 
 ```bash
-cd frontend
 npm ci
 npm run dev        # http://localhost:5173
 ```
@@ -40,7 +33,6 @@ npm run dev        # http://localhost:5173
 ## Проверки
 
 ```bash
-cd frontend
 npm run typecheck
 npm run lint
 npm run check:fsd

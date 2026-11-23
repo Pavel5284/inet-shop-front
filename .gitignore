@@ -3,3 +3,5 @@ dist
 *.local
 .env
 *.log
+FRONTEND_AGENT.md
+.idea
